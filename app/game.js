@@ -1,4 +1,11 @@
-import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  Alert,
+  Button,
+} from "react-native";
 import React, { useState } from "react";
 
 const Game = () => {
@@ -44,6 +51,10 @@ const Game = () => {
     return null;
   };
 
+  const isBoardFull = (squares) => {
+    return squares.every((square) => square !== null);
+  };
+
   const handleClick = (i) => {
     const squares = [...currentSquares];
     if (calculateWinner(squares) || squares[i]) {
@@ -51,6 +62,11 @@ const Game = () => {
     }
     squares[i] = xIsNext ? "X" : "O";
     handlePlay(squares);
+  };
+
+  const handleRestart = () => {
+    setHistory([Array(9).fill(null)]);
+    setCurrentMove(0);
   };
 
   const renderSquare = (i) => {
@@ -74,6 +90,14 @@ const Game = () => {
   let status;
   if (winner) {
     status = `Winner: ${winner}`;
+  } else if (isBoardFull(currentSquares)) {
+    status = "It's a draw!";
+    setTimeout(() => {
+      setCurrentMove(0);
+      setHistory([Array(9).fill(null)]);
+      // or click on the "Go to game start" button
+    }, 1000);
+    //Alert.alert("It's a draw!");
   } else {
     status = `Next player: ${xIsNext ? "X" : "O"}`;
   }
@@ -135,6 +159,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderWidth: 1,
+    borderColor: "green",
     alignItems: "center",
     justifyContent: "center",
   },
