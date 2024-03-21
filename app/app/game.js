@@ -5,20 +5,22 @@ import {
   TouchableOpacity,
   Alert,
   Button,
+  Vibration,
 } from "react-native";
 import React, { useState } from "react";
 
 const Game = () => {
   const [history, setHistory] = useState([Array(9).fill(null)]);
   const [currentMove, setCurrentMove] = useState(0);
+  const [xIsNext, setXIsNext] = useState(true);
 
-  const xIsNext = currentMove % 2 === 0;
   const currentSquares = history[currentMove];
 
   const handlePlay = (nextSquares) => {
     const nextHistory = history.slice(0, currentMove + 1);
     setHistory([...nextHistory, nextSquares]);
     setCurrentMove(currentMove + 1);
+    setXIsNext(!xIsNext);
   };
 
   const jumpTo = (nextMove) => {
@@ -64,9 +66,10 @@ const Game = () => {
     handlePlay(squares);
   };
 
-  const handleRestart = () => {
+  const restartGame = () => {
     setHistory([Array(9).fill(null)]);
     setCurrentMove(0);
+    setXIsNext(true);
   };
 
   const renderSquare = (i) => {
@@ -90,13 +93,15 @@ const Game = () => {
   let status;
   if (winner) {
     status = `Winner: ${winner}`;
+    Vibration.vibrate(1000);
   } else if (isBoardFull(currentSquares)) {
     status = "It's a draw!";
+    Vibration.vibrate(1000 * 2);
     setTimeout(() => {
       setCurrentMove(0);
       setHistory([Array(9).fill(null)]);
       // or click on the "Go to game start" button
-    }, 1000);
+    }, 3000);
     //Alert.alert("It's a draw!");
     //handleRestart();
   } else {
@@ -125,6 +130,9 @@ const Game = () => {
         </View>
         <View style={styles.gameInfo}>
           <Text>{status}</Text>
+          <TouchableOpacity onPress={restartGame}>
+            <Text>Restart Game</Text>
+          </TouchableOpacity>
           <Text>Moves:</Text>
           <View style={styles.moveList}>{moves}</View>
         </View>
