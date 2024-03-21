@@ -98,6 +98,7 @@ const Game = () => {
       // or click on the "Go to game start" button
     }, 1000);
     //Alert.alert("It's a draw!");
+    //handleRestart();
   } else {
     status = `Next player: ${xIsNext ? "X" : "O"}`;
   }
