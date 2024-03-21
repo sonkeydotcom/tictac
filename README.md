@@ -1,1 +1,1 @@
-# tictac
+# Tictac React Native Expo App
