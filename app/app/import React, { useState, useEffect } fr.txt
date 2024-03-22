@@ -13,7 +13,6 @@ const Game = () => {
   const [currentMove, setCurrentMove] = useState(0);
   const [xIsNext, setXIsNext] = useState(true);
   const [justRestarted, setJustRestarted] = useState(false);
-  const [multiplayer, setMultiplayer] = useState(true);
   const currentSquares = history[currentMove];
 
   const handlePlay = (nextSquares) => {
@@ -58,23 +57,19 @@ const Game = () => {
     if (calculateWinner(squares) || squares[i]) {
       return;
     }
-
-    //Alert.alert("Invalid move", "It's not your turn!");
-    squares[i] = xIsNext ? "X" : "O";
+    squares[i] = "X"; // Always set the player's move first
     handlePlay(squares);
 
     // Check for winner again after player's move
+    const winner = calculateWinner(squares);
+    if (winner) {
+      return; // If there's a winner, no need for AI to play
+    }
 
     // Find AI's move
-    if (!multiplayer) {
-      const winner = calculateWinner(squares);
-      if (winner) {
-        return; // If there's a winner, no need for AI to play
-      }
-      const bestMove = calculateBestMove(squares, "O");
-      squares[bestMove] = "O";
-      handlePlay(squares);
-    }
+    const bestMove = calculateBestMove(squares, "O");
+    squares[bestMove] = "O";
+    handlePlay(squares);
   };
 
   const calculateBestMove = (squares, player) => {
@@ -144,19 +139,9 @@ const Game = () => {
     setJustRestarted(true);
   };
 
-  const toggleMode = () => {
-    setMultiplayer(!multiplayer);
-    setHistory([Array(9).fill(null)]);
-    setCurrentMove(0);
-    setXIsNext(true); // Toggle xIsNext
-  };
-
   useEffect(() => {
     if (!xIsNext && justRestarted) {
-      const squares = [...currentSquares];
-      const bestMove = calculateBestMove(squares, "O");
-      squares[bestMove] = "O";
-      handlePlay(squares);
+      aiStarts();
       setJustRestarted(false);
     }
   }, [xIsNext, justRestarted]);
@@ -182,32 +167,20 @@ const Game = () => {
     );
   });
 
-  useEffect(() => {
-    const winner = calculateWinner(currentSquares);
-    if (winner) {
-      Vibration.vibrate(1000);
-    } else if (isBoardFull(currentSquares)) {
-      Vibration.vibrate(1000);
-      setTimeout(() => {
-        setCurrentMove(0);
-        setXIsNext((prevXIsNext) => !prevXIsNext);
-      }, 2000);
-    }
-  }, [currentSquares]);
-
   const winner = calculateWinner(currentSquares);
   let status;
   if (winner) {
     status = `Winner: ${winner}`;
+    Vibration.vibrate(1000);
   } else if (isBoardFull(currentSquares)) {
     status = "It's a draw!";
+    Vibration.vibrate(1000);
   } else {
     status = `Next player: ${xIsNext ? "X" : "O"}`;
   }
 
   return (
     <View style={styles.container}>
-      <Text>Game mode: {multiplayer ? "Multiplayer" : "Single Player"}</Text>
       <Text style={styles.status}>{status}</Text>
       <View style={styles.board}>
         {[0, 1, 2].map((row) => (
@@ -216,11 +189,6 @@ const Game = () => {
           </View>
         ))}
       </View>
-      <TouchableOpacity style={styles.button} onPress={toggleMode}>
-        <Text style={styles.buttonText}>
-          {multiplayer ? "Switch to Single Player" : "Switch to Multiplayer"}
-        </Text>
-      </TouchableOpacity>
       <TouchableOpacity style={styles.button} onPress={restartGame}>
         <Text style={styles.buttonText}>Restart Game</Text>
       </TouchableOpacity>
