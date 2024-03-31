@@ -3,8 +3,7 @@
     "name": "tictac",
     "slug": "tictac",
     "version": "1.0.0",
-    "scheme": "App",
-
+    "scheme": "sonkey-tictac-snackland",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -15,7 +14,13 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.sonkey.tictac"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "1e701b3f-c0c4-4fb6-abca-6157373b07c9"
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -24,8 +29,31 @@
       }
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro"
     },
-    "plugins": ["expo-router"]
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      "expo-build-properties",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static"
+          }
+        }
+      ],
+      [
+        "expo-dev-launcher",
+        {
+          "launchModeExperimental": "most-recent"
+        }
+      ]
+    ]
+  },
+  "react-native-google-mobile-ads": {
+    "android_app_id": "ca-app-pub-2052849149225040~9415729474",
+    "ios_app_id": "ca-app-pub-2052849149225040~9415729474"
   }
 }

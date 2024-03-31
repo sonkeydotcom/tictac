@@ -6,17 +6,110 @@ import {
   View,
   TouchableOpacity,
   Vibration,
+  ImageBackground,
+  Image,
+  Pressable,
+  SafeAreaView,
 } from "react-native";
 
+import Modal from "../components/modal";
+import { router, useGlobalSearchParams } from "expo-router";
+import { StatusBar } from "expo-status-bar";
+import { Audio } from "expo-av";
+import { useLocalSearchParams } from "expo-router";
+import CustomModal from "../components/customModal";
+import { useFonts, Pacifico_400Regular } from "@expo-google-fonts/pacifico";
+import {
+  Octicons,
+  AntDesign,
+  Ionicons,
+  MaterialIcons,
+  MaterialCommunityIcons,
+} from "@expo/vector-icons";
+
 const Game = () => {
+  const { gameMode } = useGlobalSearchParams();
+
   const [history, setHistory] = useState([Array(9).fill(null)]);
   const [currentMove, setCurrentMove] = useState(0);
   const [xIsNext, setXIsNext] = useState(true);
   const [justRestarted, setJustRestarted] = useState(false);
   const [multiplayer, setMultiplayer] = useState(true);
   const currentSquares = history[currentMove];
+  const [playerXScore, setPlayerXScore] = useState(0);
+  const [playerOScore, setPlayerOScore] = useState(0);
+  const [aiScore, setAiScore] = useState(0);
+  const [tiesScore, setTiesScore] = useState(0);
+  const [playerSymbol, setPlayerSymbol] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
-  const handlePlay = (nextSquares) => {
+  useEffect(() => {
+    // Set the game mode based on the selected option
+    if (gameMode === "singlePlayer") {
+      console.log("Single player mode");
+      // Set game mode to single player
+      setMultiplayer(false);
+    } else if (gameMode === "multiPlayer") {
+      // Set game mode to multi player
+      setMultiplayer(true);
+      console.log("Multiplayer mode");
+    }
+  }, [gameMode]);
+
+  const handleGoBack = () => {
+    Alert.alert("Go back", "Are you sure you want to go back?", [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "OK",
+        onPress: () => router.navigate("inter"),
+      },
+    ]);
+  };
+
+  const winSound = async () => {
+    const soundObject = new Audio.Sound();
+    try {
+      await soundObject.loadAsync(require("../assets/humm.wav"));
+      await soundObject.playAsync();
+    } catch (error) {
+      console.error("Failed to load the sound", error);
+    }
+  };
+
+  const btnSound = async () => {
+    const soundObject = new Audio.Sound();
+    try {
+      await soundObject.loadAsync(require("../assets/dish.wav"));
+      await soundObject.playAsync();
+    } catch (error) {
+      console.error("Failed to load the sound", error);
+    }
+  };
+
+  const playSound = async (moveType) => {
+    let soundFile = "";
+
+    // Select the sound file based on the move type
+    if (moveType === "X") {
+      soundFile = require("../assets/crunchy.wav");
+    } else if (moveType === "O") {
+      soundFile = require("../assets/soda.mp3");
+    }
+
+    const soundObject = new Audio.Sound();
+
+    try {
+      await soundObject.loadAsync(soundFile);
+      await soundObject.playAsync();
+    } catch (error) {
+      console.error("Failed to load the sound", error);
+    }
+  };
+
+  const handlePlay = async (nextSquares) => {
     const nextHistory = history.slice(0, currentMove + 1);
     setHistory([...nextHistory, nextSquares]);
     setCurrentMove(currentMove + 1);
@@ -53,7 +146,7 @@ const Game = () => {
     return squares.every((square) => square !== null);
   };
 
-  const handleClick = (i) => {
+  const handleClick = async (i) => {
     const squares = [...currentSquares];
     if (calculateWinner(squares) || squares[i]) {
       return;
@@ -62,18 +155,27 @@ const Game = () => {
     //Alert.alert("Invalid move", "It's not your turn!");
     squares[i] = xIsNext ? "X" : "O";
     handlePlay(squares);
+    const winner = calculateWinner(squares);
+
+    // Play sound feedback if there's no winner
 
     // Check for winner again after player's move
 
     // Find AI's move
     if (!multiplayer) {
+      squares[i] = "X"; // Always set the player's move first
+      handlePlay(squares);
+
       const winner = calculateWinner(squares);
       if (winner) {
         return; // If there's a winner, no need for AI to play
       }
-      const bestMove = calculateBestMove(squares, "O");
-      squares[bestMove] = "O";
-      handlePlay(squares);
+      setTimeout(() => {
+        const bestMove = calculateBestMove(squares, "O");
+        squares[bestMove] = "O";
+        handlePlay(squares);
+        setXIsNext(true);
+      }, 500);
     }
   };
 
@@ -92,7 +194,6 @@ const Game = () => {
         }
       }
     }
-
     return bestMove;
   };
 
@@ -142,6 +243,7 @@ const Game = () => {
     setCurrentMove(0);
     setXIsNext((prevXIsNext) => !prevXIsNext); // Toggle xIsNext
     setJustRestarted(true);
+    setShowModal(false);
   };
 
   const toggleMode = () => {
@@ -153,22 +255,35 @@ const Game = () => {
 
   useEffect(() => {
     if (!xIsNext && justRestarted) {
-      const squares = [...currentSquares];
-      const bestMove = calculateBestMove(squares, "O");
-      squares[bestMove] = "O";
-      handlePlay(squares);
       setJustRestarted(false);
     }
   }, [xIsNext, justRestarted]);
 
   const renderSquare = (i) => {
+    let borderStyles = {};
+    if (i % 3 !== 2) {
+      borderStyles.borderRightWidth = 2;
+    }
+    if (Math.floor(i / 3) !== 2) {
+      borderStyles.borderBottomWidth = 2;
+    }
     return (
       <TouchableOpacity
+        style={[styles.square, borderStyles]}
         key={i}
-        style={styles.square}
         onPress={() => handleClick(i)}
       >
-        <Text style={styles.squareText}>{currentSquares[i]}</Text>
+        <Text style={styles.squareText}>
+          {currentSquares[i] === "X" ? (
+            <MaterialCommunityIcons name="close" size={65} color="white" />
+          ) : currentSquares[i] === "O" ? (
+            <MaterialCommunityIcons
+              name="circle-outline"
+              size={60}
+              color="red"
+            />
+          ) : null}
+        </Text>
       </TouchableOpacity>
     );
   };
@@ -185,8 +300,24 @@ const Game = () => {
   useEffect(() => {
     const winner = calculateWinner(currentSquares);
     if (winner) {
+      if (winner === "X") {
+        setPlayerXScore(playerXScore + 1);
+        setShowModal(true);
+        winSound();
+      } else if (multiplayer && winner === "O") {
+        setPlayerOScore(playerOScore + 1);
+        setShowModal(true);
+        winSound();
+      } else if (!multiplayer && winner === "O") {
+        setAiScore(aiScore + 1);
+        setShowModal(true);
+      } else {
+        // Handle the case when there is no winner or when the AI wins in multiplayer mode
+        // You might want to show a different message or handle the logic differently here
+      }
       Vibration.vibrate(1000);
     } else if (isBoardFull(currentSquares)) {
+      setTiesScore(tiesScore + 1);
       Vibration.vibrate(1000);
       setTimeout(() => {
         setCurrentMove(0);
@@ -206,25 +337,140 @@ const Game = () => {
   }
 
   return (
-    <View style={styles.container}>
-      <Text>Game mode: {multiplayer ? "Multiplayer" : "Single Player"}</Text>
-      <Text style={styles.status}>{status}</Text>
-      <View style={styles.board}>
-        {[0, 1, 2].map((row) => (
-          <View key={row} style={styles.row}>
-            {[0, 1, 2].map((col) => renderSquare(row * 3 + col))}
+    <>
+      <StatusBar hidden={true} />
+      <SafeAreaView></SafeAreaView>
+      <ImageBackground
+        source={require("../assets/bg.jpg")}
+        style={styles.imageBg}
+      >
+        <View style={styles.container}>
+          <View style={styles.scoreSheet}>
+            <Text
+              style={[
+                styles.scoreText,
+                {
+                  borderBottomColor: currentSquares === "X" ? "red" : "blue",
+                },
+              ]}
+            >
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <View
+                  style={[
+                    styles.avata,
+                    xIsNext ? { borderColor: "orange" } : {},
+                  ]}
+                >
+                  {multiplayer ? (
+                    <Ionicons
+                      name="person-circle-outline"
+                      size={30}
+                      color={xIsNext ? "orange" : "white"}
+                    />
+                  ) : (
+                    <Octicons
+                      name="person"
+                      size={30}
+                      color={xIsNext ? "orange" : "white"}
+                    />
+                  )}
+                </View>
+                <View>
+                  <Text style={styles.scoreText}> {playerXScore} </Text>
+                  <Text style={styles.scoreText}> X </Text>
+                </View>
+              </View>
+            </Text>
+            <Text style={styles.separator}> VS </Text>
+            <Text style={styles.scoreText}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <View>
+                  <Text style={styles.scoreText}> {playerOScore} </Text>
+                  <Text style={styles.scoreText}> O </Text>
+                </View>
+                <View
+                  style={[
+                    styles.avata,
+                    !xIsNext ? { borderColor: "orange" } : {},
+                  ]}
+                >
+                  {multiplayer ? (
+                    <Octicons
+                      name="person"
+                      size={30}
+                      color={!xIsNext ? "orange" : "white"}
+                    />
+                  ) : (
+                    <AntDesign
+                      name="iconfontdesktop"
+                      size={30}
+                      color={!xIsNext ? "orange" : "white"}
+                    />
+                  )}
+                </View>
+              </View>
+            </Text>
           </View>
-        ))}
-      </View>
-      <TouchableOpacity style={styles.button} onPress={toggleMode}>
-        <Text style={styles.buttonText}>
-          {multiplayer ? "Switch to Single Player" : "Switch to Multiplayer"}
-        </Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.button} onPress={restartGame}>
-        <Text style={styles.buttonText}>Restart Game</Text>
-      </TouchableOpacity>
-    </View>
+          <View style={styles.board}>
+            {[0, 1, 2].map((row) => (
+              <View key={row} style={styles.row}>
+                {[0, 1, 2].map((col) => renderSquare(row * 3 + col))}
+              </View>
+            ))}
+          </View>
+          <Text style={styles.status}>{status}</Text>
+
+          {/*<TouchableOpacity style={styles.button} onPress={toggleMode}>
+            <Text style={styles.buttonText}>
+              {multiplayer
+                ? "Switch to Single Player"
+                : "Switch to Multiplayer"}
+            </Text>
+              </TouchableOpacity>*/}
+        </View>
+      </ImageBackground>
+      <ImageBackground source={require("../assets/bar.png")}>
+        <View style={styles.bottom}>
+          <Pressable onPress={handleGoBack}>
+            <Text style={styles.bottomText}>
+              {" "}
+              <AntDesign name="leftcircleo" size={30} color="black" />{" "}
+            </Text>
+          </Pressable>
+          <Pressable
+            onPress={() => {
+              restartGame();
+              btnSound();
+            }}
+          >
+            <Text style={styles.bottomText}>
+              {" "}
+              <MaterialIcons name="refresh" size={30} color="black" />{" "}
+            </Text>
+          </Pressable>
+        </View>
+      </ImageBackground>
+
+      <CustomModal
+        visible={showModal}
+        restartGame={restartGame}
+        multiplayer={multiplayer}
+        winner={winner}
+        status={status}
+      />
+    </>
   );
 };
 
@@ -232,16 +478,84 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: "center",
+    borderRadius: 12,
     justifyContent: "center",
-    backgroundColor: "#fff",
+    padding: 20,
+  },
+  imageBg: {
+    flex: 2,
+    resizeMode: "cover",
+    justifyContent: "center",
+  },
+  mode: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 20,
+  },
+  modeText: {
+    fontSize: 18,
+    marginBottom: 10,
+  },
+  bottomBg: {
+    width: "100%",
+    height: 100,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  bottom: {
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  bottomText: {
+    textTransform: "uppercase",
+    color: "#333333",
+    fontWeight: "bold",
+    fontSize: 18,
+  },
+  scoreSheet: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: 12,
+    borderRadius: 5,
+    width: "100%",
+  },
+  scoreText: {
+    fontSize: 18,
+    marginHorizontal: 10,
+    fontWeight: "bold",
+    color: "#ccc",
+  },
+  separator: {
+    fontSize: 18,
+    marginHorizontal: 10,
+    color: "white",
+    fontWeight: "bold",
+  },
+  icon: {
+    width: 100,
+    height: 100,
+    justifyContent: "center",
+    alignItems: "center",
   },
   status: {
-    marginBottom: 20,
+    marginBottom: 5,
     fontSize: 24,
+    fontFamily: "Pacifico_400Regular",
+    color: "#333333",
   },
   board: {
+    marginBottom: 20,
+
     borderWidth: 1,
-    borderColor: "#000",
+
+    borderRadius: 12,
   },
   row: {
     flexDirection: "row",
@@ -250,21 +564,35 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderWidth: 1,
-    borderColor: "#000",
+    borderColor: "#999",
+    margin: 2,
     alignItems: "center",
+    borderRadius: 12,
     justifyContent: "center",
   },
   squareText: {
     fontSize: 36,
   },
   button: {
-    marginTop: 20,
-    padding: 10,
+    marginTop: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
     backgroundColor: "#000",
+    borderRadius: 5,
   },
   buttonText: {
     color: "#fff",
     fontSize: 18,
+  },
+  avata: {
+    width: 50,
+    height: 50,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: "100%",
+    borderWidth: 3,
+    padding: 5,
+    borderColor: "white",
   },
 });
 
