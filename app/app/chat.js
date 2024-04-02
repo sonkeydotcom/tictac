@@ -46,16 +46,6 @@ const chat = () => {
     };
   }, [socket]);
 
-  useEffect(() => {
-    socket.on("group-message", (message) => {
-      setGroupMessage(message);
-    });
-
-    return () => {
-      socket.off("group-message");
-    };
-  }, []);
-
   const newGame = () => {
     socket.emit("new-game");
     socket.on("game-created", (gameId) => {

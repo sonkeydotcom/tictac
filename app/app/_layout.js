@@ -74,7 +74,14 @@ export default function Layout() {
         <Stack.Screen
           name="network"
           options={{
-            presentation: "formSheet",
+            presentation: "modal",
+          }}
+        />
+
+        <Stack.Screen
+          name="inchats"
+          options={{
+            presentation: "modal",
           }}
         />
       </Stack>

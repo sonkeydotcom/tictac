@@ -12,6 +12,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   Keyboard,
+  FlatList,
+  Button,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import {
@@ -29,19 +31,21 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import socket from "./socketService";
 
-export default function linear() {
+export default function inchats() {
   const isPresented = router.canGoBack();
   const [gameName, setGameName] = React.useState("");
   const [joinCode, setJoinCode] = React.useState("");
-  const [messages, setMessages] = useState("");
+
   const [groupMessage, setGroupMessage] = useState("");
   const [gameId, setGameId] = useState("");
   const [waiting, setWaiting] = useState(false);
 
+  const [message, setMessage] = useState("");
+  const [messages, setMessages] = useState([]);
+
   const [gameCreated, setGameCreated] = useState("");
 
   useEffect(() => {
-
     socket.on("group-message", (message) => {
       console.log(message);
       setGroupMessage(message);
@@ -54,9 +58,29 @@ export default function linear() {
     return () => {
       socket.off("group-message");
       socket.off("game-created");
-
     };
   }, [socket]);
+
+  useEffect(() => {
+    // Add event listener to handle incoming messages
+    socket.on("chat-message", (message) => {
+      setMessages((prevMessages) => [...prevMessages, message]);
+    });
+
+    // Clean up event listener on component unmount
+    return () => {
+      socket.off("chat-message");
+    };
+  }, []);
+
+  const sendMessage = () => {
+    if (message.trim() === "") {
+      return;
+    }
+    // Emit the message to the server
+    socket.emit("send-message", message);
+    setMessage("");
+  };
 
   const newGame = () => {
     socket.emit("new-game");
@@ -83,9 +107,14 @@ export default function linear() {
     });
   };
 
+  const renderItem = ({ item }) => (
+    <View style={styles.messageContainer}>
+      <Text style={styles.messageText}>{item}</Text>
+    </View>
+  );
+
   return (
     <View style={styles.container}>
-      {!isPresented && <Link href="../">Dismiss</Link>}
       <Stack.Screen
         options={{
           headerShadowVisible: false,
@@ -94,68 +123,34 @@ export default function linear() {
         }}
       />
       <LinearGradient
-        // Background Linear Gradient
         colors={["#a86b32", "#336e20", "#6e4220"]}
         style={styles.background}
-      />
-      {waiting && (
-        <CustomAlert title="Waiting for joins.." gameId={gameCreated} />
-      )}
-      <KeyboardAvoidingView
-        onPress={Keyboard.dismiss}
-        style={styles.overlay}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={100}
       >
-        <View>
-          <MaterialIcons name="broadcast-on-home" size={53} color="#ccc" />
-        </View>
-        <View style={styles.card}>
-          <View style={{ padding: 10 }}>
-            <TouchableOpacity
-              style={[styles.button, { width: "" }]}
-              onPress={newGame}
-            >
-              <Text style={styles.text}>Host game</Text>
-            </TouchableOpacity>
+        <KeyboardAvoidingView
+          onPress={Keyboard.dismiss}
+          style={styles.overlay}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={100}
+        >
+          <View style={styles.card}>
+            <FlatList
+              data={messages}
+              renderItem={renderItem}
+              keyExtractor={(item, index) => index.toString()}
+              inverted
+            />
           </View>
-
-          <View
-            style={{
-              flexDirection: "row",
-              width: "100%",
-              borderWidth: 1,
-              borderColor: "rgba(0, 0, 0, 0.1)",
-            }}
-          />
-
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "center",
-              alignContent: "center",
-              alignItems: "center",
-              padding: 10,
-            }}
-          >
+          <View style={styles.inputContainer}>
             <TextInput
               style={styles.input}
-              placeholder="Enter join code"
-              onChangeText={(text) => setGameId(text)}
-              value={gameId}
+              value={message}
+              onChangeText={(text) => setMessage(text)}
+              placeholder="Type your message..."
             />
-            <TouchableOpacity style={styles.button} onPress={joinGame}>
-              <Text style={styles.text}>Join</Text>
-            </TouchableOpacity>
+            <Button title="Send" onPress={sendMessage} />
           </View>
-        </View>
-        <Text style={styles.subtitle}>Play with your friends</Text>
-
-        <Text>
-          Join ID:{" "}
-          {gameCreated === "" ? `click 'Host game' to generate` : gameCreated}
-        </Text>
-      </KeyboardAvoidingView>
+        </KeyboardAvoidingView>
+      </LinearGradient>
     </View>
   );
 }
@@ -163,44 +158,30 @@ export default function linear() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
     backgroundColor: "orange",
+    justifyContent: "center",
   },
   background: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    top: 0,
+    flex: 1,
+
+    width: "100%",
     height: "100%",
   },
   button: {
     padding: 10,
     backgroundColor: "#4c669f",
     alignItems: "center",
-
     borderRadius: 5,
   },
   text: {
     fontSize: 15,
     color: "#fff",
   },
-  overlay: {
-    paddingVertical: 28,
-    alignItems: "center",
-    position: "absolute",
-    left: 0,
-    right: 0,
-    top: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.1)",
-    height: "100%",
-  },
   card: {
     borderRadius: 8,
-    width: 280,
+    padding: 18,
 
-    alignItems: "center",
-    justifyContent: "center",
+    marginHorizontal: 8,
     borderWidth: 1,
     borderColor: "transparent", // Set to "transparent" to hide the border
     marginVertical: 10,
@@ -210,11 +191,30 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginBottom: 10,
   },
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
+    paddingHorizontal: 8,
+    justifyContent: "center",
+    bottom: 0,
+  },
   input: {
+    flex: 1,
+    marginRight: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
     borderWidth: 1,
     borderColor: "#ccc",
-    borderRadius: 5,
-    padding: 10,
-    marginRight: 4,
+    borderRadius: 8,
+  },
+  messageContainer: {
+    padding: 12,
+    backgroundColor: "#f0f0f0",
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  messageText: {
+    fontSize: 16,
   },
 });

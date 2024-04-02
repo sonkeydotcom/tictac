@@ -69,11 +69,16 @@ const index = () => {
             <Text style={styles.options}> Options </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => router.navigate("removeAds")}>
+          <TouchableOpacity onPress={() => router.navigate("semira")}>
             <Text style={styles.removeAds}> Remove Ads </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.btn} onPress={() => {}}>
+          <TouchableOpacity
+            style={styles.btn}
+            onPress={() => {
+              router.navigate("logical");
+            }}
+          >
             <Text style={styles.quit}> Quit </Text>
           </TouchableOpacity>
         </View>

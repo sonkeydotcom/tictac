@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import { Socket } from "dgram";
 import express from "express";
 import http from "http";
@@ -15,23 +16,54 @@ const io = new Server(server, {
   },
 });
 
-app.get("/", (req, res) => {
-  res.send({ "Server is running": true });
-});
-
 const clientRooms = {};
 let players = [];
 let board = Array(9).fill(null);
 let currentPlayerIndex = 0;
+let sessionStore = new Map();
+
+const randomId = () => {
+  return randomUUID();
+};
+
+/** 
+io.use((socket, next) => {
+  const sessionID = socket.handshake.auth && socket.handshake.auth.sessionID;
+  if (sessionID) {
+    const session = sessionStore.get(sessionID);
+    if (session) {
+      socket.sessionID = sessionID;
+      socket.userID = session.userID;
+      return next();
+    }
+  }
+  const username = socket.handshake.auth && socket.handshake.auth.username;
+  if (!username) {
+    return next(new Error("invalid username"));
+  }
+  socket.sessionID = randomId();
+  socket.userID = randomId();
+  socket.username = username;
+  next();
+
+  console.log({
+    sessionID: socket.sessionID,
+    userID: socket.userID,
+    username: socket.username,
+    socketID: socket.id,
+  });
+});
+
+*/
 
 io.on("connection", (socket) => {
   console.log("Client connected");
-
   console.log("Players:", players);
 
-  socket.emit("gameState", {
-    board,
-    currentPlayer: players[currentPlayerIndex],
+  socket.on("join", (id) => {
+    socket.leave(socket.id);
+    socket.join(id);
+    socket.id = id;
   });
 
   socket.on("new-game", () => {
@@ -45,12 +77,8 @@ io.on("connection", (socket) => {
     socket.to(gameId).emit("group-message", "you have joined " + gameId);
     socket.emit("game-created", gameId);
     console.log("Game ID:", gameId);
-    io.to(gameId).emit("group-message", "Player joined " + gameId);
-  });
-
-  socket.on("send-message", (message, gameId) => {
-    console.log("Message:", message);
-    io.to(gameId).emit("group-message", message);
+    io.emit("semira", { players });
+    console.log("Semira:", players);
   });
 
   socket.on("join-game", (gameId) => {
@@ -75,25 +103,50 @@ io.on("connection", (socket) => {
     socket.to(gameId).emit("player-joined", {
       players: players,
     });
-
     socket.emit("player-joined");
     console.log("Room:", room);
-
+    io.to(gameId).emit("group-message", "Sonkey ko " + gameId);
     console.log("Players:", players);
-    io.emit("semira", { gameId: gameId, players });
-    io.to(gameId).emit("group-message", "Player joined " + gameId);
+    io.emit("semira", { players });
+    console.log("Semira:", players);
   });
 
-  socket.on("move", (index) => {
-    console.log("Move:", index, socket.id);
+  io.emit("semira", { players });
+  console.log("Semira:", players);
 
-    io.emit("move", index);
+  socket.on("test-message", (message) => {
+    const gameId = clientRooms[socket.id];
+    console.log("Message:", message);
+    if (!gameId) {
+      console.error("No gameId found for socket:", socket.id);
+      return;
+    }
+    io.to(gameId).emit("test-message", message);
+    console.log("Game ID:", gameId);
+  });
+
+  socket.on("send-message", (message, gameId) => {
+    console.log("Message:", message);
+    io.to(gameId).emit("group-message", message);
+  });
+
+  socket.on("move", (data) => {
+    console.log("Move:", data, socket.id);
+    io.emit("move", data);
   });
 
   socket.on("disconnect", () => {
     console.log("Client disconnected");
-    players = players.filter((player) => player !== socket.id);
+    players = players.filter(
+      (player) =>
+        player.playerOne !== socket.id && player.playerTwo !== socket.id
+    );
+    console.log("CLient with ID", socket.id, "disconnected");
   });
+});
+
+app.get("/", (req, res) => {
+  res.send({ "Server is running": true });
 });
 
 server.listen(PORT, HOST, () => {
