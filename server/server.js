@@ -7,7 +7,6 @@ import { Server } from "socket.io";
 const app = express();
 const server = http.createServer(app);
 const PORT = 3000;
-const HOST = "192.168.0.5"; // Example network IP address
 
 const io = new Server(server, {
   cors: {
@@ -157,6 +156,6 @@ app.get("/", (req, res) => {
   res.send({ "Server is running": true });
 });
 
-server.listen(PORT, HOST, () => {
-  console.log(`Server running on host http://${HOST}:${PORT}`);
+server.listen(PORT, () => {
+  console.log("Server running on port: " + PORT);
 });
