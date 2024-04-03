@@ -1,31 +1,33 @@
-import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  Alert,
+} from "react-native";
 import { router } from "expo-router";
 import React from "react";
 import { StatusBar } from "expo-status-bar";
 import { ImageBackground, Pressable } from "react-native";
-
-import { useFonts, Pacifico_400Regular } from "@expo-google-fonts/pacifico";
+import mobileAds from "react-native-google-mobile-ads";
+import FooterAds from "../components/footerAds";
+import Interstitial from "../components/interstitial";
 
 import { Asset } from "expo-asset";
-import CustomAlert from "../components/customAlert";
 
 // Preload the image
-Asset.fromModule(require("../assets/bg.png")).downloadAsync();
+Asset.fromModule(require("../assets/bg.jpg")).downloadAsync();
 Asset.fromModule(require("../assets/bar.png")).downloadAsync();
-Asset.fromModule(require("../assets/fries.png")).downloadAsync();
-Asset.fromModule(require("../assets/pizza.png")).downloadAsync();
 
 // Show the app open ad when user brings the app to the foreground.
 
 const index = () => {
-  let [fontsLoaded] = useFonts({
-    Pacifico_400Regular,
-  });
-
-  if (!fontsLoaded) {
-    return null;
-  }
-
+  mobileAds()
+    .initialize()
+    .then((adapterStatuses) => {
+      // Initialization complete!
+    });
   return (
     <>
       <StatusBar hidden={true} />
@@ -34,6 +36,7 @@ const index = () => {
         style={styles.containerImg}
       >
         <View style={styles.overlay}>
+          <Interstitial />
           <Image
             style={{ marginVertical: 38, height: 140, width: 160 }}
             source={require("../assets/download.png")}
@@ -76,11 +79,23 @@ const index = () => {
           <TouchableOpacity
             style={styles.btn}
             onPress={() => {
-              router.navigate("logical");
+              Alert.alert("Show very big ads ");
             }}
           >
             <Text style={styles.quit}> Quit </Text>
           </TouchableOpacity>
+          <View
+            style={{
+              bottom: 0,
+              position: "absolute",
+              left: 0,
+              right: 0,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <FooterAds />
+          </View>
         </View>
       </ImageBackground>
     </>

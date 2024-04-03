@@ -10,17 +10,15 @@ import {
   Octicons,
   AntDesign,
 } from "@expo/vector-icons";
+import BannerFive from "../components/bannerFive";
 
 import { useFonts, Pacifico_400Regular } from "@expo-google-fonts/pacifico";
 
 import { Asset } from "expo-asset";
-import CustomAlert from "../components/customAlert";
 
 // Preload the image
-Asset.fromModule(require("../assets/bg.png")).downloadAsync();
+Asset.fromModule(require("../assets/bg.jpg")).downloadAsync();
 Asset.fromModule(require("../assets/bar.png")).downloadAsync();
-Asset.fromModule(require("../assets/fries.png")).downloadAsync();
-Asset.fromModule(require("../assets/pizza.png")).downloadAsync();
 
 // Show the app open ad when user brings the app to the foreground.
 
@@ -117,6 +115,19 @@ const Inter = () => {
               </TouchableOpacity>
             </>
           )}
+
+          <View
+            style={{
+              bottom: 0,
+              position: "absolute",
+              left: 0,
+              right: 0,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <BannerFive />
+          </View>
         </View>
       </ImageBackground>
     </>

@@ -26,6 +26,9 @@ import {
   MaterialIcons,
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
+import Banner from "../components/banner";
+import Interstitials from "../components/interstitials";
+import Intershow from "../components/intershow";
 
 const Game = () => {
   const { gameMode } = useGlobalSearchParams();
@@ -244,6 +247,7 @@ const Game = () => {
     setXIsNext((prevXIsNext) => !prevXIsNext); // Toggle xIsNext
     setJustRestarted(true);
     setShowModal(false);
+    setShowInter(true);
   };
 
   const toggleMode = () => {
@@ -344,6 +348,8 @@ const Game = () => {
         source={require("../assets/bg.jpg")}
         style={styles.imageBg}
       >
+        <Interstitials />
+        <Intershow showInter={showInter} setShowInter={setShowInter} />
         <View style={styles.container}>
           <View style={styles.scoreSheet}>
             <Text
@@ -441,6 +447,14 @@ const Game = () => {
               </TouchableOpacity>*/}
         </View>
       </ImageBackground>
+      <View
+        style={{
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Banner />
+      </View>
       <ImageBackground source={require("../assets/bar.png")}>
         <View style={styles.bottom}>
           <Pressable onPress={handleGoBack}>
@@ -479,7 +493,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     borderRadius: 12,
-    justifyContent: "center",
     padding: 20,
   },
   imageBg: {
@@ -551,10 +564,9 @@ const styles = StyleSheet.create({
     color: "#333333",
   },
   board: {
+    marginTop: 20,
+    justifyContent: "center",
     marginBottom: 20,
-
-    borderWidth: 1,
-
     borderRadius: 12,
   },
   row: {
@@ -589,7 +601,7 @@ const styles = StyleSheet.create({
     height: 50,
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: "100%",
+    borderRadius: 9999,
     borderWidth: 3,
     padding: 5,
     borderColor: "white",

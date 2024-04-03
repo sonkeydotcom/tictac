@@ -12,7 +12,7 @@ const adUnitId = __DEV__
 
 const interstitial = InterstitialAd.createForAdRequest(adUnitId);
 
-const Interstitial = ({ showAds, setShowAds }) => {
+const Intershow = ({ showInter, setShowInter }) => {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
@@ -48,14 +48,12 @@ const Interstitial = ({ showAds, setShowAds }) => {
   };
 
   useEffect(() => {
-    if (loaded) {
-      setInterval(() => {
-        showInterstitial();
-      }, 5000);
+    if (loaded && showInter) {
+      showInterstitial();
     }
   }, [loaded]);
 
   return null;
 };
 
-export default Interstitial;
+export default Intershow;

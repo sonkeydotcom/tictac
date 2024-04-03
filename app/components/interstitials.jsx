@@ -12,7 +12,7 @@ const adUnitId = __DEV__
 
 const interstitial = InterstitialAd.createForAdRequest(adUnitId);
 
-const Interstitial = ({ showAds, setShowAds }) => {
+const Interstitials = ({ showAds, setShowAds }) => {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
@@ -51,11 +51,11 @@ const Interstitial = ({ showAds, setShowAds }) => {
     if (loaded) {
       setInterval(() => {
         showInterstitial();
-      }, 5000);
+      }, 8000);
     }
   }, [loaded]);
 
   return null;
 };
 
-export default Interstitial;
+export default Interstitials;

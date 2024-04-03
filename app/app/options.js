@@ -1,103 +1,102 @@
-import React, { useState } from "react";
 import {
-  StyleSheet,
-  Text,
   View,
-  TextInput,
+  Text,
+  StyleSheet,
   TouchableOpacity,
+  Image,
+  Switch,
 } from "react-native";
-import { Stack } from "expo-router";
+import { router } from "expo-router";
+import React, { useState } from "react";
+import { StatusBar } from "expo-status-bar";
+import { ImageBackground, Pressable } from "react-native";
+import BannerTwo from "../components/bannerTwo";
 
-const Options = () => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
+// Show the app open ads when user brings the app to the foreground.
 
-  const handleSubmit = () => {
-    // Handle form submission logic here
-    console.log("Name:", name);
-    console.log("Email:", email);
-    console.log("Message:", message);
-    // You can send the form data to your backend or perform any other action
-    // Reset the form fields after submission
-    setName("");
-    setEmail("");
-    setMessage("");
-  };
-
+const options = () => {
+  const [isEnabled, setIsEnabled] = useState(false);
+  const toggleSwitch = () => setIsEnabled((previousState) => !previousState);
   return (
-    <View style={styles.container}>
-      <Stack.Screen
-        options={{
-          headerBackTitle: "Back",
-          headerTitle: "Options",
-          headerStyle: {},
-        }}
-      />
-      <Text style={styles.title}>Contact Us</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Your Name"
-        value={name}
-        onChangeText={(text) => setName(text)}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Your Email"
-        value={email}
-        onChangeText={(text) => setEmail(text)}
-        keyboardType="email-address"
-      />
-      <TextInput
-        style={[styles.input, styles.messageInput]}
-        placeholder="Your Message"
-        value={message}
-        onChangeText={(text) => setMessage(text)}
-        multiline
-      />
-      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-        <Text style={styles.buttonText}>Submit</Text>
-      </TouchableOpacity>
-    </View>
+    <>
+      <StatusBar hidden={true} />
+      <ImageBackground
+        source={require("../assets/bg.jpg")}
+        style={styles.containerImg}
+      >
+        <View style={styles.overlay}>
+          <View>
+            <Text style={styles.title}> Options</Text>
+          </View>
+          <View style={styles.options}>
+            <Text style={styles.text}>Sound</Text>
+            <Switch
+              trackColor={{ false: "#767577", true: "#81b0ff" }}
+              thumbColor={isEnabled ? "#f5dd4b" : "#f4f3f4"}
+              ios_backgroundColor="#3e3e3e"
+              onValueChange={toggleSwitch}
+              value={isEnabled}
+            />
+          </View>
+          <View style={styles.options}>
+            <Text style={styles.text}>Notification </Text>
+            <Switch
+              trackColor={{ false: "#767577", true: "#81b0ff" }}
+              thumbColor={isEnabled ? "#f5dd4b" : "#f4f3f4"}
+              ios_backgroundColor="#3e3e3e"
+              onValueChange={toggleSwitch}
+              value={isEnabled}
+            />
+          </View>
+          <View
+            style={{
+              bottom: 0,
+              position: "absolute",
+              left: 0,
+              right: 0,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <BannerTwo />
+          </View>
+        </View>
+      </ImageBackground>
+    </>
   );
 };
 
+export default options;
+
 const styles = StyleSheet.create({
-  container: {
+  containerImg: {
     flex: 1,
+    resizeMode: "cover", // or 'stretch'
     justifyContent: "center",
+  },
+  overlay: {
+    paddingVertical: 28,
+    paddingTop: 30,
     alignItems: "center",
-    backgroundColor: "#fff",
-    padding: 20,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    height: "100%",
   },
   title: {
-    fontSize: 24,
+    fontSize: 53,
     fontWeight: "bold",
-    marginBottom: 20,
+    color: "#FFDB58",
   },
-  input: {
-    width: "100%",
-    height: 40,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    marginBottom: 10,
+  text: {
+    color: "#999999", // Example color for one player text
+    textTransform: "uppercase",
+    fontSize: 22,
+    marginVertical: 10,
+    marginHorizontal: 4,
   },
-  messageInput: {
-    height: 100,
-  },
-  button: {
-    backgroundColor: "#007bff",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
+  options: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginVertical: 6,
   },
 });
-
-export default Options;

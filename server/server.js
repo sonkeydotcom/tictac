@@ -72,13 +72,11 @@ io.on("connection", (socket) => {
     let gameId = Math.random().toString(36).substring(2, 7);
     clientRooms[socket.id] = gameId;
     let playerOne = socket.id;
-    players.push({ playerOne: playerOne });
     socket.join(gameId);
+    players.push({ playerOne: playerOne });
     socket.to(gameId).emit("group-message", "you have joined " + gameId);
     socket.emit("game-created", gameId);
     console.log("Game ID:", gameId);
-    io.emit("semira", { players });
-    console.log("Semira:", players);
   });
 
   socket.on("join-game", (gameId) => {
@@ -98,8 +96,8 @@ io.on("connection", (socket) => {
 
     clientRooms[socket.id] = gameId;
     let playerTwo = socket.id;
-    players.push({ playerTwo: playerTwo });
     socket.join(gameId);
+    players.push({ playerTwo: playerTwo });
     socket.to(gameId).emit("player-joined", {
       players: players,
     });
@@ -107,12 +105,21 @@ io.on("connection", (socket) => {
     console.log("Room:", room);
     io.to(gameId).emit("group-message", "Sonkey ko " + gameId);
     console.log("Players:", players);
-    io.emit("semira", { players });
+    io.to(gameId).emit("semira", { players });
     console.log("Semira:", players);
   });
 
-  io.emit("semira", { players });
-  console.log("Semira:", players);
+  socket.on("moves-count", (data) => {
+    console.log("Count moves:", data);
+    io.emit("count-moves", {
+      xMoves: data.xMoves + 1,
+      oMoves: data.oMoves,
+    });
+  });
+
+  socket.on("restart-game", ({ gameId }) => {
+    io.to(gameId).emit("restart-game");
+  });
 
   socket.on("test-message", (message) => {
     const gameId = clientRooms[socket.id];
@@ -131,8 +138,9 @@ io.on("connection", (socket) => {
   });
 
   socket.on("move", (data) => {
+    const gameId = clientRooms[socket.id];
     console.log("Move:", data, socket.id);
-    io.emit("move", data);
+    io.to(gameId).emit("move", data);
   });
 
   socket.on("disconnect", () => {

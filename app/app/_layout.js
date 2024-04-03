@@ -29,6 +29,14 @@ export default function Layout() {
         />
 
         <Stack.Screen
+          name="semira"
+          title=""
+          options={{
+            headerShown: false,
+          }}
+        />
+
+        <Stack.Screen
           name="inter"
           headerShown={false}
           headerTransparent={true}

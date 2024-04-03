@@ -1,88 +1,54 @@
-import React, { useState, useEffect } from 'react';
-import { View, TextInput, Button, FlatList, Text, StyleSheet } from 'react-native';
-import socket from './socketService';
+import React from "react";
+import { View, Text, StyleSheet, ImageBackground } from "react-native";
+import BannerOne from "../components/bannerOne";
+import Interstitial from "../components/interstitial";
 
-const ChatScreen = () => {
-  const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState([]);
-
-  useEffect(() => {
-    // Add event listener to handle incoming messages
-    socket.on('chat-message', (message) => {
-      setMessages((prevMessages) => [...prevMessages, message]);
-    });
-
-    // Clean up event listener on component unmount
-    return () => {
-      socket.off('chat-message');
-    };
-  }, []);
-
-  const sendMessage = () => {
-    if (message.trim() === '') {
-      return;
-    }
-    // Emit the message to the server
-    socket.emit('send-message', message);
-    setMessage('');
-  };
-
-  const renderItem = ({ item }) => (
-    <View style={styles.messageContainer}>
-      <Text style={styles.messageText}>{item}</Text>
-    </View>
-  );
-
+const semira = () => {
   return (
-    <View style={styles.container}>
-      <FlatList
-        data={messages}
-        renderItem={renderItem}
-        keyExtractor={(item, index) => index.toString()}
-        inverted
-      />
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          value={message}
-          onChangeText={(text) => setMessage(text)}
-          placeholder="Type your message..."
-        />
-        <Button title="Send" onPress={sendMessage} />
-      </View>
-    </View>
+    <>
+      <ImageBackground
+        source={require("../assets/bg.jpg")}
+        style={styles.containerImg}
+      >
+        <View style={styles.overlay}>
+          <Interstitial />
+          <Text style={styles.title}>Feature Coming Soon</Text>
+          <View
+            style={{
+              bottom: 0,
+              position: "absolute",
+              left: 0,
+              right: 0,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <BannerOne />
+          </View>
+        </View>
+      </ImageBackground>
+    </>
   );
 };
 
+export default semira;
+
 const styles = StyleSheet.create({
-  container: {
+  containerImg: {
     flex: 1,
-    paddingHorizontal: 16,
-    paddingTop: 16,
+    resizeMode: "cover",
+    justifyContent: "center",
   },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
+  overlay: {
+    paddingVertical: 28,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    height: "100%",
   },
-  input: {
-    flex: 1,
-    marginRight: 8,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
-  },
-  messageContainer: {
-    padding: 12,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 8,
-    marginBottom: 8,
-  },
-  messageText: {
-    fontSize: 16,
+  title: {
+    fontSize: 28,
+    fontWeight: "bold",
+    color: "#cccccc",
   },
 });
-
-export default ChatScreen;

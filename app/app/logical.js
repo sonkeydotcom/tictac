@@ -29,6 +29,9 @@ import {
 } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import socket from "./socketService";
+import BannerThree from "../components/bannerThree";
+import Interstitials from "../components/interstitials";
+import Intershow from "../components/intershow";
 
 const logical = () => {
   const { gameMode } = useGlobalSearchParams();
@@ -47,23 +50,23 @@ const logical = () => {
   const [gameCreated, setGameCreated] = useState("");
   const currentSquares = history[currentMove];
   const [lastPlayer, setLastPlayer] = useState(null);
-
   const [currentMove, setCurrentMove] = useState(0);
-
   const [justRestarted, setJustRestarted] = useState(false);
   const [multiplayer, setMultiplayer] = useState(true);
-
   const [showModal, setShowModal] = useState(false);
-
   const [player, setPlayer] = useState(null);
   const [testMessage, setTestMessage] = useState("");
   const [currentPlayer, setCurrentPlayer] = useState(socket.id);
   const [gameStarted, setGameStarted] = useState(false);
-
+  const [showInter, setShowInter] = useState(false);
   const [roomId, setRoomId] = useState(null); // Stores the room ID for multiplayer
 
-  console.log("playerOne", playerOne);
-  console.log("currentPlayer", currentPlayer);
+  console.log({
+    playerOne: playerOne.id,
+    currentPlayer: currentPlayer,
+    myId: socket.id,
+  });
+
   useEffect(() => {
     socket.on("group-message", (message) => {
       console.log(message);
@@ -89,10 +92,16 @@ const logical = () => {
     socket.on("move", (data) => {
       console.log(data);
       setBoard(data.squares);
-      setCurrentPlayer(data.currentPlayer);
       setXIsNext(!data.xIsNext);
-      setXMoves(data.xMoves);
-      setOMoves(data.oMoves);
+      setGameStarted(data.gameStarted);
+    });
+
+    socket.on("restart", (data) => {
+      setBoard(data.board);
+    });
+
+    socket.on("moves-count", (data) => {
+      console.log(data);
     });
 
     return () => {
@@ -100,14 +109,21 @@ const logical = () => {
       socket.off("test-message");
       socket.off("move");
       socket.off("semira");
+      socket.off("moves-count");
     };
   }, [socket]);
 
-  console.log(playerOne, playerTwo);
-
   useEffect(() => {
-    setCurrentPlayer(playerOne.id);
-  }, [playerOne]);
+    socket.on("restart-game", () => {
+      restartGame();
+    });
+
+    return () => {
+      socket.off("restart-game");
+    };
+  }, []);
+
+  console.log(playerOne, playerTwo);
 
   const handleTest = () => {
     socket.emit("test-message", testMessage, gameId);
@@ -205,35 +221,15 @@ const logical = () => {
 
   const handleClick = (i) => {
     const squares = [...board];
-
-    // If the game hasn't started and the current player is not player one, return early
-    if (socket.id !== currentPlayer) {
-      alert("Woop");
-      return;
-    } else if (!gameStarted) {
-      setGameStarted(true); // Set gameStarted to true on player one's move
-      setCurrentPlayer(
-        currentPlayer === playerOne.id ? playerTwo.id : playerOne.id
-      );
-    }
-
-    // If it's not the current player's turn, return early
-    if (currentPlayer !== (xIsNext ? playerOne.id : playerTwo.id)) {
-      alert("It's not your turn");
+    if (currentPlayer !== (xIsNext ? playerTwo.id : playerOne.id)) {
+      alert("not your turn");
       return;
     }
 
-    console.log(`currentPlayer: ${currentPlayer} | xIsNext: ${xIsNext}`);
-
-    // Rest of the existing logic...
-    console.log("gameStarted", gameStarted);
-
-    // If there's already a winner, ignore further clicks
     if (calculateWinner(squares)) {
       return;
     }
 
-    // Handle maximum moves and removing/dropping piece
     if ((xIsNext && xMoves >= 3) || (!xIsNext && oMoves >= 3)) {
       if (xIsNext && squares[i] === "X") {
         squares[i] = null;
@@ -248,55 +244,51 @@ const logical = () => {
       return;
     }
 
-    // Regular move logic if maximum moves haven't been reached
     if (squares[i] === null) {
       squares[i] = xIsNext ? "X" : "O";
       setBoard(squares);
       if (xIsNext) {
         setXMoves(xMoves + 1);
+        console.log(xMoves);
       } else {
         setOMoves(oMoves + 1);
+        console.log(oMoves);
       }
 
+      // Update currentPlayer and xIsNext
       setXIsNext(!xIsNext);
       setCurrentPlayer(xIsNext ? playerTwo.id : playerOne.id);
-
-      console.log("currentPlayer after play", currentPlayer);
     }
-
-    // Switch to the other player
-
     const bleh = squares[i];
     socket.emit("move", {
       squares,
       bleh,
       xIsNext,
-      xMoves,
       oMoves,
+      xMoves,
       player,
       currentPlayer,
+      gameStarted,
     });
   };
 
   const restartGame = () => {
+    setBoard(Array(9).fill(null));
     setHistory([Array(9).fill(null)]);
+    setXIsNext(true);
+    setXMoves(0);
+    setOMoves(0);
+    setLastPlayer(null);
     setCurrentMove(0);
-    setXIsNext((prevXIsNext) => !prevXIsNext); // Toggle xIsNext
-    setJustRestarted(true);
-    setShowModal(false);
+    setShowInter(true);
+
+    socket.emit("restart-game", { gameId });
   };
 
   const renderSquare = (i) => {
     return (
       <View style={styles.squareContainer} key={i}>
-        <TouchableOpacity
-          disabled={
-            gameStarted &&
-            currentPlayer !== (xIsNext ? playerOne.id : playerTwo.id)
-          }
-          style={styles.square}
-          onPress={() => handleClick(i)}
-        >
+        <TouchableOpacity style={styles.square} onPress={() => handleClick(i)}>
           <Text style={styles.squareText}>
             {board[i] === "X" ? (
               <MaterialCommunityIcons name="close" size={65} color="white" />
@@ -312,6 +304,14 @@ const logical = () => {
       </View>
     );
   };
+
+  useEffect(() => {
+    const winner = calculateWinner(board);
+    if (winner) {
+      winner === "X" ? Alert.alert("X won") : Alert.alert("O won");
+      Vibration.vibrate(1000);
+    }
+  }, [board]);
 
   const winner = calculateWinner(board);
   let status;
@@ -331,6 +331,8 @@ const logical = () => {
         source={require("../assets/bg.jpg")}
         style={styles.imageBg}
       >
+        <Interstitials />
+        <Intershow showInter={showInter} setShowInter={setShowInter} />
         <View style={styles.container}>
           <View style={styles.scoreSheet}>
             <Text
@@ -445,7 +447,7 @@ const logical = () => {
         </View>
       </ImageBackground>
       <View>
-        <Text>Ads here</Text>
+        <BannerThree />
       </View>
       <ImageBackground source={require("../assets/bar.png")}>
         <View style={styles.bottom}>
@@ -485,7 +487,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     borderRadius: 12,
-    justifyContent: "center",
     padding: 20,
   },
   imageBg: {
@@ -557,10 +558,8 @@ const styles = StyleSheet.create({
     color: "#333333",
   },
   board: {
+    marginTop: 25,
     marginBottom: 20,
-
-    borderWidth: 1,
-
     borderRadius: 12,
   },
   row: {
