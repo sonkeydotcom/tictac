@@ -49,9 +49,7 @@ const Interstitials = ({ showAds, setShowAds }) => {
 
   useEffect(() => {
     if (loaded) {
-      setInterval(() => {
-        showInterstitial();
-      }, 8000);
+      showInterstitial();
     }
   }, [loaded]);
 

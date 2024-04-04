@@ -1,4 +1,4 @@
-rootProject.name = 'tictac'
+rootProject.name = 'Tic tac'
 
 dependencyResolutionManagement {
   versionCatalogs {

@@ -7,27 +7,30 @@ import {
   Alert,
 } from "react-native";
 import { router } from "expo-router";
-import React from "react";
 import { StatusBar } from "expo-status-bar";
 import { ImageBackground, Pressable } from "react-native";
 import mobileAds from "react-native-google-mobile-ads";
 import FooterAds from "../components/footerAds";
 import Interstitial from "../components/interstitial";
-
+import React, { useCallback, useEffect, useState } from "react";
+import * as SplashScreen from "expo-splash-screen";
 import { Asset } from "expo-asset";
 
 // Preload the image
+
 Asset.fromModule(require("../assets/bg.jpg")).downloadAsync();
 Asset.fromModule(require("../assets/bar.png")).downloadAsync();
 
 // Show the app open ad when user brings the app to the foreground.
 
 const index = () => {
+  const [appIsReady, setAppIsReady] = useState(false);
   mobileAds()
     .initialize()
     .then((adapterStatuses) => {
       // Initialization complete!
     });
+
   return (
     <>
       <StatusBar hidden={true} />
@@ -79,7 +82,7 @@ const index = () => {
           <TouchableOpacity
             style={styles.btn}
             onPress={() => {
-              Alert.alert("Show very big ads ");
+              router.navigate("logical");
             }}
           >
             <Text style={styles.quit}> Quit </Text>

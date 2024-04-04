@@ -26,7 +26,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useState, useEffect } from "react";
 import CustomAlert from "../components/customAlert";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
+import Interstitial from "../components/interstitial";
 import socket from "./socketService";
 
 export default function linear() {
@@ -41,7 +41,6 @@ export default function linear() {
   const [gameCreated, setGameCreated] = useState("");
 
   useEffect(() => {
-
     socket.on("group-message", (message) => {
       console.log(message);
       setGroupMessage(message);
@@ -54,7 +53,6 @@ export default function linear() {
     return () => {
       socket.off("group-message");
       socket.off("game-created");
-
     };
   }, [socket]);
 
@@ -98,6 +96,7 @@ export default function linear() {
         colors={["#a86b32", "#336e20", "#6e4220"]}
         style={styles.background}
       />
+      <Interstitial />
       {waiting && (
         <CustomAlert title="Waiting for joins.." gameId={gameCreated} />
       )}

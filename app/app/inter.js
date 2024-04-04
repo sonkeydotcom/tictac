@@ -15,6 +15,7 @@ import BannerFive from "../components/bannerFive";
 import { useFonts, Pacifico_400Regular } from "@expo-google-fonts/pacifico";
 
 import { Asset } from "expo-asset";
+import Interstitial from "../components/interstitial";
 
 // Preload the image
 Asset.fromModule(require("../assets/bg.jpg")).downloadAsync();
@@ -57,6 +58,7 @@ const Inter = () => {
         style={styles.containerImg}
       >
         <View style={styles.overlay}>
+          <Interstitial />
           {classic ? (
             <>
               <TouchableOpacity

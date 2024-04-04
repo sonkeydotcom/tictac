@@ -13,7 +13,7 @@ import {
   SafeAreaView,
   Button,
 } from "react-native";
-import Modal from "../components/modal";
+
 import { router, useGlobalSearchParams, Link } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Audio } from "expo-av";
@@ -30,7 +30,7 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import socket from "./socketService";
 import BannerThree from "../components/bannerThree";
-import Interstitials from "../components/interstitials";
+import Interstitial from "../components/interstitial";
 import Intershow from "../components/intershow";
 
 const logical = () => {
@@ -280,7 +280,6 @@ const logical = () => {
     setOMoves(0);
     setLastPlayer(null);
     setCurrentMove(0);
-    setShowInter(true);
 
     socket.emit("restart-game", { gameId });
   };
@@ -331,8 +330,8 @@ const logical = () => {
         source={require("../assets/bg.jpg")}
         style={styles.imageBg}
       >
-        <Interstitials />
-        <Intershow showInter={showInter} setShowInter={setShowInter} />
+        <Interstitial />
+
         <View style={styles.container}>
           <View style={styles.scoreSheet}>
             <Text
@@ -494,15 +493,6 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
     justifyContent: "center",
   },
-  mode: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 20,
-  },
-  modeText: {
-    fontSize: 18,
-    marginBottom: 10,
-  },
   bottomBg: {
     width: "100%",
     height: 100,
@@ -544,12 +534,6 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
     color: "white",
     fontWeight: "bold",
-  },
-  icon: {
-    width: 100,
-    height: 100,
-    justifyContent: "center",
-    alignItems: "center",
   },
   status: {
     marginBottom: 5,

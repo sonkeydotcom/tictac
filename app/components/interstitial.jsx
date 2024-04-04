@@ -39,8 +39,10 @@ const Interstitial = ({ showAds, setShowAds }) => {
 
   const showInterstitial = () => {
     if (loaded) {
-      interstitial.show();
-      console.log("Interstitial Ad Shown");
+      setTimeout(() => {
+        interstitial.show();
+        console.log("Interstitial Ad Shown");
+      }, 30000); // 30 seconds
     } else {
       console.log("Interstitial Ad not loaded yet");
       return;
@@ -49,9 +51,7 @@ const Interstitial = ({ showAds, setShowAds }) => {
 
   useEffect(() => {
     if (loaded) {
-      setInterval(() => {
-        showInterstitial();
-      }, 5000);
+      showInterstitial();
     }
   }, [loaded]);
 

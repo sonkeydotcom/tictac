@@ -1,20 +1,18 @@
 {
   "expo": {
-    "name": "tictac",
+    "name": "Tic tac",
     "slug": "tictac",
     "version": "1.0.0",
     "scheme": "sonkey-tictac-snackland",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/icons.png",
     "userInterfaceStyle": "light",
     "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
+      "image": "./assets/tic_tac_toe_loader_.gif",
+      "resizeMode": "cover",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.sonkey.tictac"
@@ -26,7 +24,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/adaptive-icons.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.sonkey.tictac"

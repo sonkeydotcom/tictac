@@ -11,8 +11,6 @@ import {
   Pressable,
   SafeAreaView,
 } from "react-native";
-
-import Modal from "../components/modal";
 import { router, useGlobalSearchParams } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { Audio } from "expo-av";
@@ -27,7 +25,7 @@ import {
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
 import Banner from "../components/banner";
-import Interstitials from "../components/interstitials";
+import Interstitial from "../components/interstitial";
 import Intershow from "../components/intershow";
 
 const Game = () => {
@@ -45,6 +43,7 @@ const Game = () => {
   const [tiesScore, setTiesScore] = useState(0);
   const [playerSymbol, setPlayerSymbol] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [showInter, setShowInter] = useState(false);
 
   useEffect(() => {
     // Set the game mode based on the selected option
@@ -160,10 +159,6 @@ const Game = () => {
     handlePlay(squares);
     const winner = calculateWinner(squares);
 
-    // Play sound feedback if there's no winner
-
-    // Check for winner again after player's move
-
     // Find AI's move
     if (!multiplayer) {
       squares[i] = "X"; // Always set the player's move first
@@ -234,20 +229,12 @@ const Game = () => {
     }
   };
 
-  const aiStarts = () => {
-    const squares = [...currentSquares];
-    const bestMove = calculateBestMove(squares, "O");
-    squares[bestMove] = "O";
-    handlePlay(squares);
-  };
-
   const restartGame = () => {
     setHistory([Array(9).fill(null)]);
     setCurrentMove(0);
     setXIsNext((prevXIsNext) => !prevXIsNext); // Toggle xIsNext
     setJustRestarted(true);
     setShowModal(false);
-    setShowInter(true);
   };
 
   const toggleMode = () => {
@@ -258,10 +245,15 @@ const Game = () => {
   };
 
   useEffect(() => {
-    if (!xIsNext && justRestarted) {
-      setJustRestarted(false);
+    if (!xIsNext && !multiplayer && justRestarted) {
+      console.log("AI starts");
+      const squares = [...currentSquares];
+      const bestMove = calculateBestMove(squares, "O");
+      squares[bestMove] = "O";
+      handlePlay(squares);
+      setXIsNext(true);
     }
-  }, [xIsNext, justRestarted]);
+  }, [justRestarted]);
 
   const renderSquare = (i) => {
     let borderStyles = {};
@@ -312,12 +304,12 @@ const Game = () => {
         setPlayerOScore(playerOScore + 1);
         setShowModal(true);
         winSound();
-      } else if (!multiplayer && winner === "O") {
+      } else if (!multiplayer) {
         setAiScore(aiScore + 1);
-        setShowModal(true);
       } else {
         // Handle the case when there is no winner or when the AI wins in multiplayer mode
         // You might want to show a different message or handle the logic differently here
+        setShowModal(true);
       }
       Vibration.vibrate(1000);
     } else if (isBoardFull(currentSquares)) {
@@ -348,8 +340,7 @@ const Game = () => {
         source={require("../assets/bg.jpg")}
         style={styles.imageBg}
       >
-        <Interstitials />
-        <Intershow showInter={showInter} setShowInter={setShowInter} />
+        <Interstitial />
         <View style={styles.container}>
           <View style={styles.scoreSheet}>
             <Text
@@ -470,7 +461,6 @@ const Game = () => {
             }}
           >
             <Text style={styles.bottomText}>
-              {" "}
               <MaterialIcons name="refresh" size={30} color="black" />{" "}
             </Text>
           </Pressable>
