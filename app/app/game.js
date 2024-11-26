@@ -24,9 +24,9 @@ import {
   MaterialIcons,
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
-import Banner from "../components/banner";
-import Interstitial from "../components/interstitial";
-import Intershow from "../components/intershow";
+// import Banner from "../components/banner";
+// import Interstitial from "../components/interstitial";
+// import Intershow from "../components/intershow";
 
 const Game = () => {
   const { gameMode } = useGlobalSearchParams();
@@ -340,7 +340,7 @@ const Game = () => {
         source={require("../assets/bg.jpg")}
         style={styles.imageBg}
       >
-        <Interstitial />
+        {/* <Interstitial /> */}
         <View style={styles.container}>
           <View style={styles.scoreSheet}>
             <Text
@@ -444,7 +444,7 @@ const Game = () => {
           justifyContent: "center",
         }}
       >
-        <Banner />
+        {/* <Banner /> */}
       </View>
       <ImageBackground source={require("../assets/bar.png")}>
         <View style={styles.bottom}>

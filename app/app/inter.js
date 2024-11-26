@@ -10,12 +10,12 @@ import {
   Octicons,
   AntDesign,
 } from "@expo/vector-icons";
-import BannerFive from "../components/bannerFive";
+// import BannerFive from "../components/bannerFive";
 
 import { useFonts, Pacifico_400Regular } from "@expo-google-fonts/pacifico";
 
 import { Asset } from "expo-asset";
-import Interstitial from "../components/interstitial";
+// import Interstitial from "../components/interstitial";
 
 // Preload the image
 Asset.fromModule(require("../assets/bg.jpg")).downloadAsync();
@@ -58,7 +58,7 @@ const Inter = () => {
         style={styles.containerImg}
       >
         <View style={styles.overlay}>
-          <Interstitial />
+          {/* <Interstitial /> */}
           {classic ? (
             <>
               <TouchableOpacity
@@ -128,7 +128,7 @@ const Inter = () => {
               justifyContent: "center",
             }}
           >
-            <BannerFive />
+            {/* <BannerFive /> */}
           </View>
         </View>
       </ImageBackground>

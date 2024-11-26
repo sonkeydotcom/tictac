@@ -2,6 +2,7 @@
   "expo": {
     "name": "Tic tac",
     "slug": "tictac",
+    "newArchEnabled": true,
     "version": "1.0.0",
     "scheme": "sonkey-tictac-snackland",
     "orientation": "portrait",

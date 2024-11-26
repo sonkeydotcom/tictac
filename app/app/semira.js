@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, StyleSheet, ImageBackground } from "react-native";
-import BannerOne from "../components/bannerOne";
-import Interstitial from "../components/interstitial";
+// import BannerOne from "../components/bannerOne";
+// import Interstitial from "../components/interstitial";
 
 const semira = () => {
   return (
@@ -11,7 +11,7 @@ const semira = () => {
         style={styles.containerImg}
       >
         <View style={styles.overlay}>
-          <Interstitial />
+          {/* <Interstitial /> */}
           <Text style={styles.title}>Feature Coming Soon</Text>
           <View
             style={{
@@ -23,7 +23,7 @@ const semira = () => {
               justifyContent: "center",
             }}
           >
-            <BannerOne />
+            {/* <BannerOne /> */}
           </View>
         </View>
       </ImageBackground>

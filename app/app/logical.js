@@ -29,9 +29,9 @@ import {
 } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import socket from "./socketService";
-import BannerThree from "../components/bannerThree";
-import Interstitial from "../components/interstitial";
-import Intershow from "../components/intershow";
+// import BannerThree from "../components/bannerThree";
+// import Interstitial from "../components/ritial";
+// import Intershow from "../components/intershow";
 
 const logical = () => {
   const { gameMode } = useGlobalSearchParams();
@@ -330,7 +330,7 @@ const logical = () => {
         source={require("../assets/bg.jpg")}
         style={styles.imageBg}
       >
-        <Interstitial />
+        {/* <Interstitial /> */}
 
         <View style={styles.container}>
           <View style={styles.scoreSheet}>
@@ -445,9 +445,7 @@ const logical = () => {
               </TouchableOpacity>*/}
         </View>
       </ImageBackground>
-      <View>
-        <BannerThree />
-      </View>
+      <View>{/* <BannerThree /> */}</View>
       <ImageBackground source={require("../assets/bar.png")}>
         <View style={styles.bottom}>
           <Pressable onPress={handleGoBack}>

@@ -9,9 +9,9 @@ import {
 import { router } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { ImageBackground, Pressable } from "react-native";
-import mobileAds from "react-native-google-mobile-ads";
-import FooterAds from "../components/footerAds";
-import Interstitial from "../components/interstitial";
+
+// import FooterAds from "../components/footerAds";
+// import Interstitial from "../components/interstitial";
 import React, { useCallback, useEffect, useState } from "react";
 import * as SplashScreen from "expo-splash-screen";
 import { Asset } from "expo-asset";
@@ -25,11 +25,11 @@ Asset.fromModule(require("../assets/bar.png")).downloadAsync();
 
 const index = () => {
   const [appIsReady, setAppIsReady] = useState(false);
-  mobileAds()
-    .initialize()
-    .then((adapterStatuses) => {
-      // Initialization complete!
-    });
+  // mobileAds()
+  //   .initialize()
+  //   .then((adapterStatuses) => {
+  //     // Initialization complete!
+  //   });
 
   return (
     <>
@@ -39,7 +39,7 @@ const index = () => {
         style={styles.containerImg}
       >
         <View style={styles.overlay}>
-          <Interstitial />
+          {/* <Interstitial /> */}
           <Image
             style={{ marginVertical: 38, height: 140, width: 160 }}
             source={require("../assets/download.png")}
@@ -97,7 +97,7 @@ const index = () => {
               justifyContent: "center",
             }}
           >
-            <FooterAds />
+            {/* <FooterAds /> */}
           </View>
         </View>
       </ImageBackground>

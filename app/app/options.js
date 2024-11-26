@@ -10,7 +10,7 @@ import { router } from "expo-router";
 import React, { useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { ImageBackground, Pressable } from "react-native";
-import BannerTwo from "../components/bannerTwo";
+// import BannerTwo from "../components/bannerTwo";
 
 // Show the app open ads when user brings the app to the foreground.
 
@@ -58,7 +58,7 @@ const options = () => {
               justifyContent: "center",
             }}
           >
-            <BannerTwo />
+            {/* <BannerTwo /> */}
           </View>
         </View>
       </ImageBackground>
